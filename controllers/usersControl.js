@@ -1,4 +1,5 @@
-import fs from 'fs';
+import fs, { fdatasync } from 'fs';
+import { features } from 'process';
 import { v4 as uniq } from 'uuid';
 const data = fs.promises;
 
@@ -111,6 +112,22 @@ export const updateUser = async (req, res) => {
             return res
                 .status(404)
                 .send('Provided user ID is Invalid. Please try Again');
+    } catch (e) {
+        res.status(400).send(e.message);
+    }
+};
+export const usersTransfer = async (req, res) => {
+    try {
+        let users = await loadUsers();
+        let { from, to, amount } = req.body;
+        let fromUser = users.find((user) => user.id === from);
+        let toUser = users.find((user) => user.id === to);
+        if (Number(fromUser.cash) >= amount) {
+            fromUser.cash = Number(fromUser.cash - amount);
+            toUser.cash = Number(toUser.cash + amount);
+        }
+        savedUsers(users);
+        res.status(200).send(users);
     } catch (e) {
         res.status(400).send(e.message);
     }
