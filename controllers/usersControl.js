@@ -55,7 +55,10 @@ export const addUser = async (req, res) => {
     try {
         const users = await loadUsers();
         const newUser = req.body;
-        users.push({ ...newUser, id: uniq() });
+        //it is more optimal to use here regex for validation
+        if (!newUser.name || newUser.name.length < 2)
+            res.status(400).send('Please enter a valid name');
+        users.push({ ...newUser, id: uniq(), cash: 0, credit: 0 });
         savedUsers(users);
         res.status(201).send(users);
     } catch (e) {
@@ -71,7 +74,7 @@ export const deleteUser = async (req, res) => {
             users = users.filter((user) => user.id !== id);
             if (users.length === initialLength) {
                 res.status(400).send(
-                    'Failed to delete a user, Please check the ID is typed correctly'
+                    'Failed to delete a user, Please check the ID is correct'
                 );
             } else {
                 savedUsers(users);
@@ -92,8 +95,8 @@ export const updateUser = async (req, res) => {
         const { cash, credit } = req.body;
         const updateUser = users.find((user) => user.id === id);
         if (updateUser) {
-            if (cash) updateUser.cash = cash;
-            if (credit) updateUser.credit = credit;
+            if (cash >= 0) updateUser.cash = cash;
+            if (credit >= 0) updateUser.credit = credit;
             if (!cash && !credit)
                 return res.send('Cash or Credit values are required.');
             savedUsers(users);
