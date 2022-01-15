@@ -20,36 +20,89 @@ const savedUsers = function (users) {
 //exports
 
 export const getUsers = async (req, res) => {
-    const users = await loadUsers();
-    res.status(200).send(users);
+    try {
+        const users = await loadUsers();
+        if (users.length) return res.status(200).send(users);
+        else
+            return res
+                .status(200)
+                .send('There are no clients yet. Feel free to Add some.');
+    } catch (e) {
+        res.status(500).send(e.message);
+    }
 };
 export const getUser = async (req, res) => {
-    const users = await loadUsers();
-    const { id } = req.params;
-    const requestedUser = users.find((user) => user.id === id);
-    res.send(requestedUser);
+    try {
+        const users = await loadUsers();
+        const { id } = req.params;
+        if (id.length === 36) {
+            users.find((user) => {
+                if (user.id === id) return res.status(200).send(user);
+                else
+                    return res
+                        .status(404)
+                        .send(`Cannot find a user with ID ${id}`);
+            });
+        } else
+            return res
+                .status(404)
+                .send('Provided user ID is Invalid. Please try Again');
+    } catch (e) {
+        res.status(400).send(e.message);
+    }
 };
 export const addUser = async (req, res) => {
-    const users = await loadUsers();
-    const newUser = req.body;
-    users.push({ ...newUser, id: uniq() });
-    savedUsers(users);
-    res.status(200).send(users);
+    try {
+        const users = await loadUsers();
+        const newUser = req.body;
+        users.push({ ...newUser, id: uniq() });
+        savedUsers(users);
+        res.status(201).send(users);
+    } catch (e) {
+        res.status(404).send(e.message);
+    }
 };
 export const deleteUser = async (req, res) => {
-    let users = await loadUsers();
-    const { id } = req.params;
-    users = users.filter((user) => user.id !== id);
-    savedUsers(users);
-    res.send(users);
+    try {
+        let users = await loadUsers();
+        const { id } = req.params;
+        if (id.length === 36) {
+            let initialLength = users.length;
+            users = users.filter((user) => user.id !== id);
+            if (users.length === initialLength) {
+                res.status(400).send(
+                    'Failed to delete a user, Please check the ID is typed correctly'
+                );
+            } else {
+                savedUsers(users);
+                res.status(200).send(`Successfully deleted user ${id}`);
+            }
+        } else
+            return res
+                .status(404)
+                .send('Provided user ID is Invalid. Please try Again');
+    } catch (e) {
+        res.send.status(400).send(e.message);
+    }
 };
 export const updateUser = async (req, res) => {
-    let users = await loadUsers();
-    const { id } = req.params;
-    const { cash, credit } = req.body;
-    const updateUser = users.find((user) => user.id === id);
-    if (cash) updateUser.cash = cash;
-    if (credit) updateUser.credit = credit;
-    savedUsers(users);
-    res.send(updateUser);
+    try {
+        let users = await loadUsers();
+        const { id } = req.params;
+        const { cash, credit } = req.body;
+        const updateUser = users.find((user) => user.id === id);
+        if (updateUser) {
+            if (cash) updateUser.cash = cash;
+            if (credit) updateUser.credit = credit;
+            if (!cash && !credit)
+                return res.send('Cash or Credit values are required.');
+            savedUsers(users);
+            res.send(updateUser);
+        } else
+            return res
+                .status(404)
+                .send('Provided user ID is Invalid. Please try Again');
+    } catch (e) {
+        res.status(400).send(e.message);
+    }
 };

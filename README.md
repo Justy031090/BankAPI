@@ -1,3 +1,3 @@
 # BankAPI
 
-### A simple CRUD API created using NodeJS & Express
+A simple CRUD API created using NodeJS & Express
