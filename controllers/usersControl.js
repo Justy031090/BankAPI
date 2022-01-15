@@ -95,8 +95,14 @@ export const updateUser = async (req, res) => {
         const { cash, credit } = req.body;
         const updateUser = users.find((user) => user.id === id);
         if (updateUser) {
-            if (cash >= 0) updateUser.cash = cash;
-            if (credit >= 0) updateUser.credit = credit;
+            if (cash) {
+                if (Number(cash) >= 0) updateUser.cash = cash;
+                else return res.send('Cash must have a positive value');
+            }
+            if (credit) {
+                if (Number(credit) >= 0) updateUser.credit = credit;
+                else return res.send('Credit must have a positive value');
+            }
             if (!cash && !credit)
                 return res.send('Cash or Credit values are required.');
             savedUsers(users);
