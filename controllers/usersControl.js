@@ -1,5 +1,4 @@
 import fs, { fdatasync } from 'fs';
-import { features } from 'process';
 import { v4 as uniq } from 'uuid';
 const data = fs.promises;
 
@@ -29,7 +28,7 @@ export const getUsers = async (req, res) => {
                 .status(200)
                 .send('There are no clients yet. Feel free to Add some.');
     } catch (e) {
-        res.status(500).send(e.message);
+        throw new Error(e.message);
     }
 };
 export const getUser = async (req, res) => {
@@ -63,7 +62,7 @@ export const addUser = async (req, res) => {
         savedUsers(users);
         res.status(201).send(users);
     } catch (e) {
-        res.status(404).send(e.message);
+        throw new Error(e.message);
     }
 };
 export const deleteUser = async (req, res) => {
@@ -86,7 +85,7 @@ export const deleteUser = async (req, res) => {
                 .status(404)
                 .send('Provided user ID is Invalid. Please try Again');
     } catch (e) {
-        res.send.status(400).send(e.message);
+        throw new Error(e.message);
     }
 };
 export const updateUser = async (req, res) => {
@@ -113,7 +112,7 @@ export const updateUser = async (req, res) => {
                 .status(404)
                 .send('Provided user ID is Invalid. Please try Again');
     } catch (e) {
-        res.status(400).send(e.message);
+        throw new Error(e.message);
     }
 };
 export const usersTransfer = async (req, res) => {
@@ -129,6 +128,6 @@ export const usersTransfer = async (req, res) => {
         savedUsers(users);
         res.status(200).send(users);
     } catch (e) {
-        res.status(400).send(e.message);
+        throw new Error(e.message);
     }
 };
